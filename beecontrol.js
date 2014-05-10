@@ -4,6 +4,7 @@ L.Control.BeeControl = L.Control.extend({
 		position: "topright"
 		, r1: 3
 		, r2: 5
+		, instructiontext: ""
 	},
 
 	initialize: function(options) {
@@ -292,10 +293,11 @@ L.Control.BeeControl = L.Control.extend({
 		this.options.m = 1;
 		document.getElementById('idBeeControlCenter').checked = true;
 		this._markPosition();
-		this._marker.bindPopup("Zieh' mich dorthin,<br />wo deine Bienen stehen.<br />"
+		var markerText = "Zieh' mich dorthin,<br />wo deine Bienen stehen.<br />"
 				+ (askGeolocation ? '(<a href="#" onClick="doGeolocate()">Oder lass mich heraus-<br />'
 				+ 'finden, wo du gerade bist</a>)<br /><br />' : '')
-				+ "Weiteres steht in der<br />Anleitung oben links.").openPopup();
+				+ this.options.instructiontext;
+		this._marker.bindPopup(markerText).openPopup();
 	}
 
 });
