@@ -9,7 +9,7 @@ L.Control.BeeControl = L.Control.extend({
 	initialize: function(options) {
 		L.Util.setOptions(this, options);
 		this._beeIcon = L.icon({
-			iconUrl: 'images/beemarker.png'
+			iconUrl: 'beemarker.png'
 			, iconSize: [37, 65]
 			, iconAnchor: [18, 63]
 			, popupAnchor: [0, -63]
