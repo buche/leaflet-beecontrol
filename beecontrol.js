@@ -38,7 +38,7 @@ L.Control.BeeControl = L.Control.extend({
 		name.innerHTML = 'Bienenstandort';
 		baseDiv.appendChild(name);
 		L.DomEvent.on(input, 'click', this._onInputClickPosition, this);
-		L.DomUtil.create('br', null, baseDiv);
+		L.DomUtil.create('br', '', baseDiv);
 
 		// add checkbox for main area
 		var input1 = L.DomUtil.create('input');
@@ -52,10 +52,10 @@ L.Control.BeeControl = L.Control.extend({
 		name1.innerHTML = 'Hauptfluggebiet';
 		baseDiv.appendChild(name1);
 		L.DomEvent.on(input1, 'click', this._onInputClickRadius1, this);
-		L.DomUtil.create('br', null, baseDiv);
+		L.DomUtil.create('br', '', baseDiv);
 
 		// add radius for main area
-		var dummy1 = L.DomUtil.create('input', null, baseDiv);
+		var dummy1 = L.DomUtil.create('input', '', baseDiv);
 		dummy1.type = 'checkbox';
 		dummy1.style.visibility = 'hidden';
 		var nameS1 = L.DomUtil.create('span', 'beecontrol-label');
@@ -75,7 +75,7 @@ L.Control.BeeControl = L.Control.extend({
 		}
 		baseDiv.appendChild(select1);
 		L.DomEvent.on(select1, 'change', this._onSelectRadius1, this);
-		L.DomUtil.create('br', null, baseDiv);
+		L.DomUtil.create('br', '', baseDiv);
 
 		// add checkbox for wide area
 		var input2 = L.DomUtil.create('input');
@@ -89,10 +89,10 @@ L.Control.BeeControl = L.Control.extend({
 		name2.innerHTML = 'Erreichbares Gebiet';
 		baseDiv.appendChild(name2);
 		L.DomEvent.on(input2, 'click', this._onInputClickRadius2, this);
-		L.DomUtil.create('br', null, baseDiv);
+		L.DomUtil.create('br', '', baseDiv);
 
 		// add radius for wide area
-		var dummy2 = L.DomUtil.create('input', null, baseDiv);
+		var dummy2 = L.DomUtil.create('input', '', baseDiv);
 		dummy2.type = 'checkbox';
 		dummy2.style.visibility = 'hidden';
 		var nameS2 = L.DomUtil.create('span', 'beecontrol-label');
@@ -112,28 +112,26 @@ L.Control.BeeControl = L.Control.extend({
 		}
 		baseDiv.appendChild(select2);
 		L.DomEvent.on(select2, 'change', this._onSelectRadius2, this);
-		L.DomUtil.create('br', null, baseDiv);
 	},
 
 	_initElement: function(baseDiv, beCompact) {
 		// beCompact is unused yet
-		var beeElement = L.DomUtil.create('div', 'beecontrol-element', this._container);
+		var beeElement = L.DomUtil.create('div', 'beecontrol-element', baseDiv);
 		this._initElementDetailed(beeElement);
 	},
 
 	_initLayout: function() {
-		var classname = 'beecontrol';
-		this._container = L.DomUtil.create('div', classname);
+		this._container = L.DomUtil.create('div', 'beecontrol');
 		L.DomEvent.disableClickPropagation(this._container);
 
-		var heading = L.DomUtil.create('div', classname + '-header', this._container);
+		var heading = L.DomUtil.create('div', 'beecontrol-header', this._container);
 		heading.innerHTML = 'Flugbereich eines<br />Bienenvolkes';
 
-		var beeElements = L.DomUtil.create('div', classname + '-elements', this._container);
+		var beeElements = L.DomUtil.create('div', 'beecontrol-elements', this._container);
 		this._initElement(beeElements, false);
 
-		var resetLine = L.DomUtil.create('label', classname + '-line', this._container);
-		var resetLink = L.DomUtil.create('a', classname + '-link');
+		var resetLine = L.DomUtil.create('label', 'beecontrol-line', this._container);
+		var resetLink = L.DomUtil.create('a', 'beecontrol-link');
 		resetLink.innerHTML = 'Einstellungen löschen';
 		resetLink.setAttribute('href', 'index.html');
 		resetLine.appendChild(resetLink);
