@@ -1,23 +1,25 @@
 L.Control.BeeControl = L.Control.extend({
 
 	options: {
-		position: "topright"
-		, r1: 3
-		, r2: 5
-		, useGeolocation: true
-		, instructiontext: ""
+		position: "topright" // default position of control
+		, r1: 3 // default radius of main area
+		, r2: 5 // default radius of wide area
+		, color: '#03f' // default color of areas
+		, useGeolocation: true // flag to disable geolocation
+		, instructiontext: "" // additional text for marker popup
 	},
 
 	initialize: function(options) {
 		L.Util.setOptions(this, options);
 		this._beeIcon = L.icon({
-			iconUrl: 'beemarker.png'
+			iconUrl: 'beemarker.png' // TODO: make icon configurable
 			, iconSize: [37, 65]
 			, iconAnchor: [18, 63]
 			, popupAnchor: [0, -63]
 		});
 		this._r1_list = [1, 2, 2.5, 3, 3.5];
 		this._r2_list = [4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11];
+		this._bees = {}; // holds all bee location data objects
 	},
 
 	onAdd: function(map) {
@@ -29,6 +31,41 @@ L.Control.BeeControl = L.Control.extend({
 		return this._container;
 	},
 
+	/**
+	 * Initializes a structure holding all data of one bee location.
+	 * @returns object
+	 */
+	_initBeeData: function() {
+		var bee = {};
+		bee.centerChecked = false;
+		bee.center = null;
+		bee.innerChecked = false;
+		bee.innerRadius = this.options.r1;
+		bee.innerColor = this.options.color;
+		bee.innerCircle = null;
+		bee.outerChecked = false;
+		bee.outerRadius = this.options.r2;
+		bee.outerColor = this.options.color;
+		bee.outerCircle = null;
+		bee.marker = null;
+		return bee;
+	},
+
+	/**
+	 * Create DOM for one beehive position in a compact way.
+	 * @param object baseDiv container for new DOM elements
+	 * @param integer counter consecutive number of beehive position elements
+	 */
+	_initElementCompact: function(baseDiv, counter) {
+		// TODO: compact view isn't realised yet
+		this._initElementDetailed(baseDiv, counter);
+	},
+
+	/**
+	 * Create DOM for one beehive position in detail.
+	 * @param object baseDiv container for new DOM elements
+	 * @param integer counter consecutive number of beehive position elements
+	 */
 	_initElementDetailed: function(baseDiv, counter) {
 		// add checkbox for bee location
 		var input = L.DomUtil.create('input');
@@ -55,7 +92,7 @@ L.Control.BeeControl = L.Control.extend({
 		name1.setAttribute('for', input1.id);
 		name1.innerHTML = 'Hauptfluggebiet';
 		baseDiv.appendChild(name1);
-		L.DomEvent.on(input1, 'click', this._onInputClickRadius1, this);
+		L.DomEvent.on(input1, 'click', this._onInputClickRadius, this);
 		L.DomUtil.create('br', '', baseDiv);
 
 		// add radius for main area
@@ -66,7 +103,7 @@ L.Control.BeeControl = L.Control.extend({
 		nameS1.innerHTML = 'Radius ';
 		baseDiv.appendChild(nameS1);
 		var select1 = L.DomUtil.create('select');
-		select1.id = 'idBeeControlRM_' + counter;
+		select1.id = 'idBeeControlRI_' + counter;
 		for (var i=0; i<this._r1_list.length; i++) {
 			var val = this._r1_list[i];
 			var opt = document.createElement('option');
@@ -92,7 +129,7 @@ L.Control.BeeControl = L.Control.extend({
 		name2.setAttribute('for', input2.id);
 		name2.innerHTML = 'Erreichbares Gebiet';
 		baseDiv.appendChild(name2);
-		L.DomEvent.on(input2, 'click', this._onInputClickRadius2, this);
+		L.DomEvent.on(input2, 'click', this._onInputClickRadius, this);
 		L.DomUtil.create('br', '', baseDiv);
 
 		// add radius for wide area
@@ -103,7 +140,7 @@ L.Control.BeeControl = L.Control.extend({
 		nameS2.innerHTML = 'Radius ';
 		baseDiv.appendChild(nameS2);
 		var select2 = L.DomUtil.create('select');
-		select2.id = 'idBeeControlRW_' + counter;
+		select2.id = 'idBeeControlRO_' + counter;
 		for (var i=0; i<this._r2_list.length; i++) {
 			var val = this._r2_list[i];
 			var opt = document.createElement('option');
@@ -115,13 +152,22 @@ L.Control.BeeControl = L.Control.extend({
 			select2.appendChild(opt);
 		}
 		baseDiv.appendChild(select2);
-		L.DomEvent.on(select2, 'change', this._onSelectRadius2, this);
+		L.DomEvent.on(select2, 'change', this._onSelectRadius, this);
 	},
 
+	/**
+	 * Create DOM for one beehive position.
+	 * @param object baseDiv container for new DOM elements
+	 * @param integer counter consecutive number of beehive position elements
+	 * @param boolean beCompact flag to use a compact view if true
+	 */
 	_initElement: function(baseDiv, counter, beCompact) {
-		// beCompact is unused yet
 		var beeElement = L.DomUtil.create('div', 'beecontrol-element', baseDiv);
-		this._initElementDetailed(beeElement, counter);
+		if (beCompact) {
+			this._initElementCompact(beeElement, counter);
+		} else {
+			this._initElementDetailed(beeElement, counter);
+		}
 	},
 
 	_initLayout: function() {
@@ -141,123 +187,107 @@ L.Control.BeeControl = L.Control.extend({
 		resetLine.appendChild(resetLink);
 	},
 
-	_markPosition: function() {
-		var input = document.getElementById('idBeeControlCenter_1'); // TODO: get current center
+	/**
+	 * A beehive position will be marked or unmarked as requested by user or programm.
+	 * @param integer beenr the consecutive number of the beehive position
+	 */
+	_markPosition: function(beenr) {
+		var bee = typeof this._bees['bee' + beenr] == 'undefined' ? this._initBeeData() : this._bees['bee' + beenr];
+		var input = document.getElementById('idBeeControlCenter_' + beenr);
 		if (input.checked) {
-			var center;
-			if (this.options.mlat && this.options.mlon) {
-				center = new L.LatLng(this.options.mlat, this.options.mlon);
-			} else {
-				center = this._map.getCenter();
+			bee.centerChecked = true;
+			if (!bee.center) {
+				bee.center = this._map.getCenter();
 			}
-			if (this._marker && this._map.hasLayer(this._marker)) {
-				this._map.removeLayer(this._marker);
+			if (bee.marker && this._map.hasLayer(bee.marker)) {
+				this._map.removeLayer(bee.marker);
 			}
-			this._marker = L.marker(center, {draggable: true, icon: this._beeIcon});
-			this._marker.on('dragend', this._onMarkerDragend, this);
-			this._marker.addTo(this._map);
-			this.options.m = 1;
-			this.options.mlat = this._marker.getLatLng().lat;
-			this.options.mlon = this._marker.getLatLng().lng;
+			if (typeof bee.marker == 'undefined' || !bee.marker) {
+				bee.marker = L.marker(bee.center, {draggable: true, icon: this._beeIcon});
+				bee.marker._beenr = beenr;
+				bee.marker.on('dragend', this._onMarkerDragend, this);
+			}
+			bee.marker.addTo(this._map);
 		} else {
-			this._map.removeLayer(this._marker);
-			this._marker = null;
-			this.options.m = null;
-			if (!this._circle1 && !this._circle2) {
-				this.options.mlat = null;
-				this.options.mlon = null;
+			this._map.removeLayer(bee.marker);
+			bee.marker = null;
+			bee.centerChecked = false;
+			if (!bee.innerCircle && !bee.outerCircle) {
+				bee.center = null;
 			}
 		}
+		this._bees['bee' + beenr] = bee;
 	},
 
-	_onInputClickPosition: function(evnt) {
-		this._markPosition();
+	/**
+	 * Set or unset marker depending on input field change.
+	 * @param object e event
+	 */
+	_onInputClickPosition: function(e) {
+		var beenr = e.target.id.split('_')[1];
+		this._markPosition(beenr);
 		this._map.fire('beecontrolchanged');
 	},
 
-	_drawRadius1: function() {
-		// clean up first
-		if (this._circle1 && this._map.hasLayer(this._circle1)) this._map.removeLayer(this._circle1);
-		this._circle1 = null;
-		this.options.c1 = null;
-
-		// draw circle if needed
-		var input = document.getElementById('idBeeControlInner_1')
-		if (input.checked) {
-			this.options.c1 = 1;
-			var center;
-			if (this.options.mlat && this.options.mlon) {
-				center = new L.LatLng(this.options.mlat, this.options.mlon);
-			} else {
-				center = this._map.getCenter();
-				this.options.mlat = center.lat;
-				this.options.mlon = center.lng;
-			}
-			this._circle1 = L.circle(center, this.options.r1*1000, {clickable: true}).addTo(this._map);
+	_drawRadius: function(beenr) {
+		var bee = this._bees['bee' + beenr];
+		// clean up inner circle
+		if (bee.innerCircle && this._map.hasLayer(bee.innerCircle)) {
+			this._map.removeLayer(bee.innerCircle);
+			bee.innerCircle = null;
+		}
+		// clean up outer circle
+		if (bee.outerCircle && this._map.hasLayer(bee.outerCircle)) {
+			this._map.removeLayer(bee.outerCircle);
+			bee.outerCircle = null;
 		}
 
-		if (!this._marker && !this._circle1 && !this._circle2) {
-			this.options.mlat = null;
-			this.options.mlon = null;
+		// add inner circle if requested
+		if (!bee.center) {
+			bee.center = this._map.getCenter();
+		}
+		var input = document.getElementById('idBeeControlInner_' + beenr);
+		if (input && input.checked) {
+			bee.innerCircle = L.circle(bee.center, bee.innerRadius*1000, {clickable: true}).addTo(this._map);
+		}
+
+		// add outer circle if requested
+		input = document.getElementById('idBeeControlOuter_' + beenr);
+		if (input && input.checked) {
+			bee.outerCircle = L.circle(bee.center, bee.outerRadius*1000, {clickable: true}).addTo(this._map);
+		}
+
+		// clear center if it isn't needed any more
+		if (!bee.marker && !bee.innerCircle && !bee.outerCircle) {
+			bee.center = null;
 		}
 	},
 
-	_onInputClickRadius1: function() {
-		this._drawRadius1();
+	_onSelectRadius: function(e) {
+		var beenr = e.target.id.split('_')[1];
+		var bee = this._bees['bee' + beenr];
+		var radiusType = e.target.id.split('_')[0];
+		radiusType = radiusType.substr(radiusType.length -1, 1);
+		if (radiusType == 'I') {
+			bee.innerRadius = e.target.value;
+		} else {
+			bee.outerRadius = e.target.value;
+		}
+		this._drawRadius(beenr);
 		this._map.fire('beecontrolchanged');
 	},
 
-	_onSelectRadius: function(evnt) {
-		// TODO: generalize function for any radius selected
-		var select = evnt.target;
-		this.options.r1 = select.value;
-		this._onInputClickRadius1();
-	},
-
-	_drawRadius2: function() {
-		// clean up first
-		if (this._circle2 && this._map.hasLayer(this._circle2)) this._map.removeLayer(this._circle2);
-		this._circle2 = null;
-		this.options.c2 = null;
-
-		// draw circle if needed
-		var input = document.getElementById('idBeeControlOuter_1')
-		if (input.checked) {
-			this.options.c2 = 1;
-			var center;
-			if (this.options.mlat && this.options.mlon) {
-				center = new L.LatLng(this.options.mlat, this.options.mlon);
-			} else {
-				center = this._map.getCenter();
-				this.options.mlat = center.lat;
-				this.options.mlon = center.lng;
-			}
-			this._circle2 = L.circle(center, this.options.r2*1000, {clickable: true}).addTo(this._map);
-		}
-
-		if (!this._marker && !this._circle1 && !this._circle2) {
-			this.options.mlat = null;
-			this.options.mlon = null;
-		}
-	},
-
-	_onInputClickRadius2: function() {
-		this._drawRadius2();
+	_onInputClickRadius: function(e) {
+		var beenr = e.target.id.split('_')[1];
+		this._drawRadius(beenr);
 		this._map.fire('beecontrolchanged');
-	},
-
-	_onSelectRadius2: function(evnt) {
-		var select = evnt.target;
-		this.options.r2 = select.value;
-		this._onInputClickRadius2();
 	},
 
 	_onMarkerDragend: function(e) {
 		var marker = e.target;
-		this.options.mlat = marker.getLatLng().lat;
-		this.options.mlon = marker.getLatLng().lng;
-		this._drawRadius1();
-		this._drawRadius2();
+		var bee = this._bees['bee' + marker._beenr];
+		bee.center = marker.getLatLng();
+		this._drawRadius(marker._beenr);
 		this._map.fire('beecontrolchanged');
 	},
 
@@ -266,14 +296,14 @@ L.Control.BeeControl = L.Control.extend({
 			for (var i=0; i<this._r1_list.length; i++) {
 				if (this._r1_list[i] == e.params.r1) {
 					this.options.r1 = e.params.r1;
-					var elem1 = document.getElementById('idBeeControlRM_1');
+					var elem1 = document.getElementById('idBeeControlRI_1');
 					elem1.value = this.options.r1;
 					elem1.selectedIndex = i;
 
 					// This ugly code is needed for Internet Explorer to trigger <select> to change its display
 					_s1idx = i; // global with intent
 					window.setTimeout(function() {
-						document.getElementById('idBeeControlRM_1').selectedIndex = _s1idx;
+						document.getElementById('idBeeControlRI_1').selectedIndex = _s1idx;
 					}, 200)
 				}
 			}
@@ -282,14 +312,14 @@ L.Control.BeeControl = L.Control.extend({
 			for (var i=0; i<this._r2_list.length; i++) {
 				if (this._r2_list[i] == e.params.r2) {
 					this.options.r2 = e.params.r2;
-					var elem2 = document.getElementById('idBeeControlRW_1');
+					var elem2 = document.getElementById('idBeeControlRO_1');
 					elem2.value = this.options.r2;
 					elem2.selectedIndex = i;
 
 					// This ugly code is needed for Internet Explorer to trigger <select> to change its display
 					_s2idx = i; // global with intent
 					window.setTimeout(function() {
-						document.getElementById('idBeeControlRW_1').selectedIndex = _s2idx;
+						document.getElementById('idBeeControlRO_1').selectedIndex = _s2idx;
 					}, 210)
 				}
 			}
@@ -304,48 +334,65 @@ L.Control.BeeControl = L.Control.extend({
 		if (e.params.c1 && this.options.mlat && this.options.mlon) {
 			this.options.c1 = 1;
 			document.getElementById('idBeeControlInner_1').checked = true;
-			this._drawRadius1();
+			this._drawRadius('1');
 		}
 		if (e.params.c2 && this.options.mlat && this.options.mlon) {
 			this.options.c2 = 1;
 			document.getElementById('idBeeControlOuter_1').checked = true;
-			this._drawRadius2();
+			this._drawRadius('1');
 		}
 		if (e.params.m && this.options.mlat && this.options.mlon) {
 			this.options.m = 1;
 			document.getElementById('idBeeControlCenter_1').checked = true;
-			this._markPosition();
+			this._markPosition('1');
 		}
 	},
 
+	/**
+	 * Set an initial marker.
+	 * @param boolean askGeolocation ask for geolocation if true
+	 */
 	initMarker: function(askGeolocation) {
 		var ask = typeof askGeolocation == 'undefined' ? true : !!askGeolocation;
 		ask = this.options.useGeolocation && ask && typeof navigator.geolocation != "undefined";
-		var center = this._map.getCenter();
-		this.options.mlat = center.lat;
-		this.options.mlon = center.lng;
-		this.options.m = 1;
+
 		document.getElementById('idBeeControlCenter_1').checked = true;
-		this._markPosition();
+		this._markPosition('1');
+		this._drawRadius('1');
 		var markerText = "Zieh' mich dorthin,<br />wo deine Bienen stehen.<br />"
-				// TODO: fix usage of global variable map on next line
-				+ (ask ? '(<a href="#" onClick="map.locate({timeout: 10000})">Oder lass mich heraus-<br />'
-				+ 'finden, wo du gerade bist</a>)<br /><br />' : '')
+				// TODO: we still need the global variable map for starting geolocation
+				+ ((ask && typeof map != 'undefined')
+					? '(<a href="#" onClick="map.locate({timeout: 10000})">Oder lass mich heraus-<br />'
+						+ 'finden, wo du gerade bist</a>)<br /><br />'
+					: '')
 				+ this.options.instructiontext;
-		this._marker.bindPopup(markerText).openPopup();
+		this._bees.bee1.marker.bindPopup(markerText).openPopup();
 	},
 
+	/**
+	 * Set an initial marker after calling geolocation. Don't ask for geolocation again.
+	 */
 	setMarkerAfterGeolocation: function() {
 		this.initMarker(false);
 	},
 
+	/**
+	 * Geolocation returned with an error.
+	 * Set marker in the center of the map without asking again for geolocation.
+	 */
 	_geolocationError: function(msg) {
 		alert("Keine Ahnung, wo du steckst.\nDu musst den Bienenkorb leider selbst platzieren.");
 		this.setMarkerAfterGeolocation();
 	},
 
+	/**
+	 * Geolocation returned with a position. Center the map on this position
+	 * and set a marker when position is changed.
+	 * @param object location data
+	 */
 	_geolocationFound: function(data) {
 		if (typeof this._map != "undefined") {
+			this._bees = {}; // reset all bee position data when geolocation succeedes
 			this._map.addOneTimeEventListener('moveend', this.setMarkerAfterGeolocation, this)
 			this._map.setView(data.latlng, 13);
 		}
@@ -353,6 +400,9 @@ L.Control.BeeControl = L.Control.extend({
 
 });
 
+/**
+ * Shortcut function for creating an instance of BeeControl.
+ */
 L.control.beeControl = function(options) {
 	return new L.Control.BeeControl(options);
 }
