@@ -20,16 +20,17 @@ L.Control.BeeControl = L.Control.extend({
 	},
 
 	onAdd: function(map) {
+		this._countBees = 1;
 		this._initLayout();
 		this._map.on('updatebeecontrol', this._update_beecontrol, this);
 		return this._container;
 	},
 
-	_initElementDetailed: function(baseDiv) {
+	_initElementDetailed: function(baseDiv, counter) {
 		// add checkbox for bee location
 		var input = L.DomUtil.create('input');
 		input.type = 'checkbox';
-		input.id = 'idBeeControlCenter';
+		input.id = 'idBeeControlCenter_' + counter;
 		baseDiv.appendChild(input);
 
 		// add label for bee location
@@ -43,7 +44,7 @@ L.Control.BeeControl = L.Control.extend({
 		// add checkbox for main area
 		var input1 = L.DomUtil.create('input');
 		input1.type = 'checkbox';
-		input1.id = 'idBeeControlR1';
+		input1.id = 'idBeeControlInner_' + counter;
 		baseDiv.appendChild(input1);
 
 		// add label for main area
@@ -62,7 +63,7 @@ L.Control.BeeControl = L.Control.extend({
 		nameS1.innerHTML = 'Radius ';
 		baseDiv.appendChild(nameS1);
 		var select1 = L.DomUtil.create('select');
-		select1.id = 'idBeeControlS1';
+		select1.id = 'idBeeControlRM_' + counter;
 		for (var i=0; i<this._r1_list.length; i++) {
 			var val = this._r1_list[i];
 			var opt = document.createElement('option');
@@ -74,13 +75,13 @@ L.Control.BeeControl = L.Control.extend({
 			select1.appendChild(opt);
 		}
 		baseDiv.appendChild(select1);
-		L.DomEvent.on(select1, 'change', this._onSelectRadius1, this);
+		L.DomEvent.on(select1, 'change', this._onSelectRadius, this);
 		L.DomUtil.create('br', '', baseDiv);
 
 		// add checkbox for wide area
 		var input2 = L.DomUtil.create('input');
 		input2.type = 'checkbox';
-		input2.id = 'idBeeControlR2';
+		input2.id = 'idBeeControlOuter_' + counter;
 		baseDiv.appendChild(input2);
 
 		// add label for wide area
@@ -99,7 +100,7 @@ L.Control.BeeControl = L.Control.extend({
 		nameS2.innerHTML = 'Radius ';
 		baseDiv.appendChild(nameS2);
 		var select2 = L.DomUtil.create('select');
-		select2.id = 'idBeeControlS2';
+		select2.id = 'idBeeControlRW_' + counter;
 		for (var i=0; i<this._r2_list.length; i++) {
 			var val = this._r2_list[i];
 			var opt = document.createElement('option');
@@ -114,10 +115,10 @@ L.Control.BeeControl = L.Control.extend({
 		L.DomEvent.on(select2, 'change', this._onSelectRadius2, this);
 	},
 
-	_initElement: function(baseDiv, beCompact) {
+	_initElement: function(baseDiv, counter, beCompact) {
 		// beCompact is unused yet
 		var beeElement = L.DomUtil.create('div', 'beecontrol-element', baseDiv);
-		this._initElementDetailed(beeElement);
+		this._initElementDetailed(beeElement, counter);
 	},
 
 	_initLayout: function() {
@@ -128,7 +129,7 @@ L.Control.BeeControl = L.Control.extend({
 		heading.innerHTML = 'Flugbereich eines<br />Bienenvolkes';
 
 		var beeElements = L.DomUtil.create('div', 'beecontrol-elements', this._container);
-		this._initElement(beeElements, false);
+		this._initElement(beeElements, this._countBees++, false);
 
 		var resetLine = L.DomUtil.create('label', 'beecontrol-line', this._container);
 		var resetLink = L.DomUtil.create('a', 'beecontrol-link');
@@ -138,7 +139,7 @@ L.Control.BeeControl = L.Control.extend({
 	},
 
 	_markPosition: function() {
-		var input = document.getElementById('idBeeControlCenter')
+		var input = document.getElementById('idBeeControlCenter_1'); // TODO: get current center
 		if (input.checked) {
 			var center;
 			if (this.options.mlat && this.options.mlon) {
@@ -166,7 +167,7 @@ L.Control.BeeControl = L.Control.extend({
 		}
 	},
 
-	_onInputClickPosition: function() {
+	_onInputClickPosition: function(evnt) {
 		this._markPosition();
 		this._map.fire('beecontrolchanged');
 	},
@@ -178,7 +179,7 @@ L.Control.BeeControl = L.Control.extend({
 		this.options.c1 = null;
 
 		// draw circle if needed
-		var input = document.getElementById('idBeeControlR1')
+		var input = document.getElementById('idBeeControlInner_1')
 		if (input.checked) {
 			this.options.c1 = 1;
 			var center;
@@ -203,8 +204,9 @@ L.Control.BeeControl = L.Control.extend({
 		this._map.fire('beecontrolchanged');
 	},
 
-	_onSelectRadius1: function() {
-		var select = document.getElementById('idBeeControlS1')
+	_onSelectRadius: function(evnt) {
+		// TODO: generalize function for any radius selected
+		var select = evnt.target;
 		this.options.r1 = select.value;
 		this._onInputClickRadius1();
 	},
@@ -216,7 +218,7 @@ L.Control.BeeControl = L.Control.extend({
 		this.options.c2 = null;
 
 		// draw circle if needed
-		var input = document.getElementById('idBeeControlR2')
+		var input = document.getElementById('idBeeControlOuter_1')
 		if (input.checked) {
 			this.options.c2 = 1;
 			var center;
@@ -241,8 +243,8 @@ L.Control.BeeControl = L.Control.extend({
 		this._map.fire('beecontrolchanged');
 	},
 
-	_onSelectRadius2: function() {
-		var select = document.getElementById('idBeeControlS2')
+	_onSelectRadius2: function(evnt) {
+		var select = evnt.target;
 		this.options.r2 = select.value;
 		this._onInputClickRadius2();
 	},
@@ -261,14 +263,14 @@ L.Control.BeeControl = L.Control.extend({
 			for (var i=0; i<this._r1_list.length; i++) {
 				if (this._r1_list[i] == e.params.r1) {
 					this.options.r1 = e.params.r1;
-					var elem1 = document.getElementById('idBeeControlS1');
+					var elem1 = document.getElementById('idBeeControlRM_1');
 					elem1.value = this.options.r1;
 					elem1.selectedIndex = i;
 
 					// This ugly code is needed for Internet Explorer to trigger <select> to change its display
 					_s1idx = i; // global with intent
 					window.setTimeout(function() {
-						document.getElementById('idBeeControlS1').selectedIndex = _s1idx;
+						document.getElementById('idBeeControlRM_1').selectedIndex = _s1idx;
 					}, 200)
 				}
 			}
@@ -277,14 +279,14 @@ L.Control.BeeControl = L.Control.extend({
 			for (var i=0; i<this._r2_list.length; i++) {
 				if (this._r2_list[i] == e.params.r2) {
 					this.options.r2 = e.params.r2;
-					var elem2 = document.getElementById('idBeeControlS2');
+					var elem2 = document.getElementById('idBeeControlRW_1');
 					elem2.value = this.options.r2;
 					elem2.selectedIndex = i;
 
 					// This ugly code is needed for Internet Explorer to trigger <select> to change its display
 					_s2idx = i; // global with intent
 					window.setTimeout(function() {
-						document.getElementById('idBeeControlS2').selectedIndex = _s2idx;
+						document.getElementById('idBeeControlRW_1').selectedIndex = _s2idx;
 					}, 210)
 				}
 			}
@@ -298,17 +300,17 @@ L.Control.BeeControl = L.Control.extend({
 
 		if (e.params.c1 && this.options.mlat && this.options.mlon) {
 			this.options.c1 = 1;
-			document.getElementById('idBeeControlR1').checked = true;
+			document.getElementById('idBeeControlInner_1').checked = true;
 			this._drawRadius1();
 		}
 		if (e.params.c2 && this.options.mlat && this.options.mlon) {
 			this.options.c2 = 1;
-			document.getElementById('idBeeControlR2').checked = true;
+			document.getElementById('idBeeControlOuter_1').checked = true;
 			this._drawRadius2();
 		}
 		if (e.params.m && this.options.mlat && this.options.mlon) {
 			this.options.m = 1;
-			document.getElementById('idBeeControlCenter').checked = true;
+			document.getElementById('idBeeControlCenter_1').checked = true;
 			this._markPosition();
 		}
 	},
@@ -319,7 +321,7 @@ L.Control.BeeControl = L.Control.extend({
 		this.options.mlat = center.lat;
 		this.options.mlon = center.lng;
 		this.options.m = 1;
-		document.getElementById('idBeeControlCenter').checked = true;
+		document.getElementById('idBeeControlCenter_1').checked = true;
 		this._markPosition();
 		var markerText = "Zieh' mich dorthin,<br />wo deine Bienen stehen.<br />"
 				+ (askGeolocation ? '(<a href="#" onClick="doGeolocate()">Oder lass mich heraus-<br />'
