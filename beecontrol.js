@@ -328,6 +328,7 @@ L.Control.BeeControl = L.Control.extend({
 		document.getElementById('idBeeControlCenter_1').checked = true;
 		this._markPosition();
 		var markerText = "Zieh' mich dorthin,<br />wo deine Bienen stehen.<br />"
+				// TODO: fix usage of global variable map on next line
 				+ (ask ? '(<a href="#" onClick="map.locate({timeout: 10000})">Oder lass mich heraus-<br />'
 				+ 'finden, wo du gerade bist</a>)<br /><br />' : '')
 				+ this.options.instructiontext;
@@ -335,7 +336,6 @@ L.Control.BeeControl = L.Control.extend({
 	},
 
 	setMarkerAfterGeolocation: function() {
-		this._map.off('moveend', this.setMarkerAfterGeolocation);
 		this.initMarker(false);
 	},
 
@@ -346,7 +346,7 @@ L.Control.BeeControl = L.Control.extend({
 
 	_geolocationFound: function(data) {
 		if (typeof this._map != "undefined") {
-			this._map.on('moveend', this.setMarkerAfterGeolocation, this);
+			this._map.addOneTimeEventListener('moveend', this.setMarkerAfterGeolocation, this)
 			this._map.setView(data.latlng, 13);
 		}
 	}
