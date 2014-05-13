@@ -6,75 +6,6 @@
  */
 
 var map;
-var beeControl;
-
-/**
- * Get all parameters out of the URL.
- * @return Array List of URL parameters key-value indexed
- */
-function getUrlParameters() {
-	var vars = [], hash;
-	var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-	for(var i=0; i<hashes.length; i++) {
-		hash = hashes[i].split('=');
-		vars.push(hash[0]);
-		vars[hash[0]] = hash[1];
-	}
-	return vars;
-}
-
-/**
- * Show some information what this map does and what it doesn't.
- */
-function toggleInfo() {
-	var infodiv = document.getElementById("infodiv");
-	if (infodiv.style.display == "block") {
-		infodiv.style.display = "none";
-	} else {
-		setIframeContent();
-		setLinkContent();
-		infodiv.style.display = "block";
-	}
-}
-
-/**
- * Add the bee marker after geolocation happened.
- */
-function setMarkerAfterGeolocation() {
-	map.off('moveend', setMarkerAfterGeolocation);
-	beeControl.initMarker(false);
-}
-
-/**
- * Callback for error in geolocation.
- * @var msg errormessage
- */
-function geolocationError(msg) {
-	alert("Keine Ahnung, wo du steckst.\nDu musst die Biene leider selbst platzieren.");
-	setMarkerAfterGeolocation();
-}
-
-/**
- * Callback for successful geolocation.
- * @var position Geolocated position
- */
-function geolocationFound(position) {
-	if (typeof map != "undefined") {
-		var lat = position.coords.latitude;
-		var lon = position.coords.longitude;
-		map.on('moveend', setMarkerAfterGeolocation);
-		map.setView(new L.LatLng(lat, lon), 13);
-	}
-}
-
-/**
- * Geolocation is requested, do it.
- */
-function doGeolocate() {
-	if (typeof navigator.geolocation != "undefined") {
-		navigator.geolocation.getCurrentPosition(geolocationFound, geolocationError);
-	}
-}
 
 /**
  * Initialize the map.
@@ -116,7 +47,7 @@ function initMap() {
 	map.attributionControl.setPrefix("");
 
 	// add BeeControl to the map
-	beeControl = L.control.beeControl().addTo(map);
+	var beeControl = L.control.beeControl().addTo(map);
 
 	// list all layers to use in the layer control
 	var baseMaps = {
@@ -134,6 +65,6 @@ function initMap() {
 	layerControl._form.children[0].parentNode.insertBefore(patch, layerControl._form.children[0]);
 
 	// let BeeControl show an initial marker in the center of the map, asking for geolocation
-	beeControl.initMarker(true);
+	beeControl.initMarker();
 }
 

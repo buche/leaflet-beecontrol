@@ -4,6 +4,7 @@ L.Control.BeeControl = L.Control.extend({
 		position: "topright"
 		, r1: 3
 		, r2: 5
+		, useGeolocation: true
 		, instructiontext: ""
 	},
 
@@ -23,6 +24,8 @@ L.Control.BeeControl = L.Control.extend({
 		this._countBees = 1;
 		this._initLayout();
 		this._map.on('updatebeecontrol', this._update_beecontrol, this);
+		this._map.on('locationfound', this._geolocationFound, this);
+		this._map.on('locationerror', this._geolocationError, this);
 		return this._container;
 	},
 
@@ -316,7 +319,8 @@ L.Control.BeeControl = L.Control.extend({
 	},
 
 	initMarker: function(askGeolocation) {
-		var askGeolocation = askGeolocation && typeof navigator.geolocation != "undefined";
+		var ask = typeof askGeolocation == 'undefined' ? true : !!askGeolocation;
+		ask = this.options.useGeolocation && ask && typeof navigator.geolocation != "undefined";
 		var center = this._map.getCenter();
 		this.options.mlat = center.lat;
 		this.options.mlon = center.lng;
@@ -324,10 +328,27 @@ L.Control.BeeControl = L.Control.extend({
 		document.getElementById('idBeeControlCenter_1').checked = true;
 		this._markPosition();
 		var markerText = "Zieh' mich dorthin,<br />wo deine Bienen stehen.<br />"
-				+ (askGeolocation ? '(<a href="#" onClick="doGeolocate()">Oder lass mich heraus-<br />'
+				+ (ask ? '(<a href="#" onClick="map.locate({timeout: 10000})">Oder lass mich heraus-<br />'
 				+ 'finden, wo du gerade bist</a>)<br /><br />' : '')
 				+ this.options.instructiontext;
 		this._marker.bindPopup(markerText).openPopup();
+	},
+
+	setMarkerAfterGeolocation: function() {
+		this._map.off('moveend', this.setMarkerAfterGeolocation);
+		this.initMarker(false);
+	},
+
+	_geolocationError: function(msg) {
+		alert("Keine Ahnung, wo du steckst.\nDu musst den Bienenkorb leider selbst platzieren.");
+		this.setMarkerAfterGeolocation();
+	},
+
+	_geolocationFound: function(data) {
+		if (typeof this._map != "undefined") {
+			this._map.on('moveend', this.setMarkerAfterGeolocation, this);
+			this._map.setView(data.latlng, 13);
+		}
 	}
 
 });
