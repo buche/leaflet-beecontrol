@@ -6,7 +6,6 @@
  */
 
 var map;
-var memberLayer;
 var beeControl;
 
 /**
@@ -69,17 +68,6 @@ function geolocationFound(position) {
 }
 
 /**
- * Remove the layer containing relation member vectors.
- */
-function removeMemberLayer() {
-	if (typeof memberLayer != "undefined" && memberLayer != null && map.hasLayer(memberLayer)) {
-		map.removeLayer(memberLayer);
-		memberLayer.clearLayers();
-		memberLayer = null;
-	}
-}
-
-/**
  * Geolocation is requested, do it.
  */
 function doGeolocate() {
@@ -93,6 +81,7 @@ function doGeolocate() {
  */
 function initMap() {
 
+	// initialize some map layers
 	var mapquestUrl = "http://{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png",
 		mapquestSubDomains = ["otile1","otile2","otile3","otile4"],
 		mapquestAttrib = 'Data, imagery and map information provided by '
@@ -113,10 +102,12 @@ function initMap() {
 		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors</a>'
 		});
 
+	// set initial map center and zoom
 	var zoom = 7;
 	var lat = 51.58;
 	var lon = 10.1;
 
+	// initialize the map
 	map = L.map('map', {
 		center: new L.LatLng(lat, lon),
 		zoom: zoom,
@@ -124,13 +115,17 @@ function initMap() {
 	});
 	map.attributionControl.setPrefix("");
 
+	// add BeeControl to the map
+	beeControl = L.control.beeControl().addTo(map);
+
+	// list all layers to use in the layer control
 	var baseMaps = {
 		"Mapquest Open": mapquest
 		, "OpenStreetMap.de": mapnikde
 		, "OpenStreetMap": standard
 	};
 
-	beeControl = L.control.beeControl().addTo(map);
+	// add LayerControl to the map
 	var layerControl = L.control.layers(baseMaps, {}, {collapsed: false}).addTo(map);
 
 	// patch layerControl to add titles
@@ -138,6 +133,7 @@ function initMap() {
 	patch.innerHTML = 'Kartenstil';
 	layerControl._form.children[0].parentNode.insertBefore(patch, layerControl._form.children[0]);
 
+	// let BeeControl show an initial marker in the center of the map, asking for geolocation
 	beeControl.initMarker(true);
 }
 
