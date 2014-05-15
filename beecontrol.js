@@ -28,6 +28,7 @@ L.Control.BeeControl = L.Control.extend({
 		this._map.on('updatebeecontrol', this._update_beecontrol, this);
 		this._map.on('locationfound', this._geolocationFound, this);
 		this._map.on('locationerror', this._geolocationError, this);
+		this._map.on('beecontroladdelement', this._addBeeElement, this);
 		return this._container;
 	},
 
@@ -226,6 +227,14 @@ L.Control.BeeControl = L.Control.extend({
 		}
 	},
 
+	_addBeeElement: function() {
+		// get the container
+		var container = document.getElementById('idBeeElementContainer');
+		// add a bee element
+		this._initElement(container, this._countBees++, true);
+		L.DomUtil.create('hr', '', container);
+	},
+
 	_initLayout: function() {
 		this._container = L.DomUtil.create('div', 'beecontrol');
 		L.DomEvent.disableClickPropagation(this._container);
@@ -234,9 +243,18 @@ L.Control.BeeControl = L.Control.extend({
 		heading.innerHTML = 'Flugbereich eines<br />Bienenvolkes';
 
 		var beeElements = L.DomUtil.create('div', 'beecontrol-elements', this._container);
+		beeElements.id = 'idBeeElementContainer';
 		this._initElement(beeElements, this._countBees++, false);
 
 		L.DomUtil.create('hr', '', beeElements);
+		var addLine = L.DomUtil.create('label', 'beecontrol-line', this._container);
+		var addLink = L.DomUtil.create('a', 'beecontrol-link');
+		addLink.innerHTML = 'Zusätzlicher Standort';
+		// global variable map is needed to fire an event
+		addLink.onclick = function() { map.fire('beecontroladdelement'); return false; }
+		addLink.setAttribute('href', 'index.html');
+		addLine.appendChild(addLink);
+
 		var resetLine = L.DomUtil.create('label', 'beecontrol-line', this._container);
 		var resetLink = L.DomUtil.create('a', 'beecontrol-link');
 		resetLink.innerHTML = 'Alles zurücksetzen';
@@ -428,7 +446,7 @@ L.Control.BeeControl = L.Control.extend({
 		this._markPosition('1');
 		this._drawRadius('1');
 		var markerText = "Zieh' mich dorthin,<br />wo deine Bienen stehen.<br />"
-				// TODO: we still need the global variable map for starting geolocation
+				// we still need the global variable "map" for starting geolocation
 				+ ((ask && typeof map != 'undefined')
 					? '(<a href="#" onClick="map.locate({timeout: 10000})">Oder lass mich heraus-<br />'
 						+ 'finden, wo du gerade bist</a>)<br /><br />'
