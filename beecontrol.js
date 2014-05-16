@@ -63,7 +63,7 @@ L.Control.BeeControl = L.Control.extend({
 	 */
 	_initElementCompact: function(baseDiv, counter) {
 		// add checkbox for bee location
-		var input = L.DomUtil.create('input');
+		var input = L.DomUtil.create('input', '');
 		input.type = 'checkbox';
 		input.id = 'idBeeControlCenter_' + counter;
 		baseDiv.appendChild(input);
@@ -77,14 +77,14 @@ L.Control.BeeControl = L.Control.extend({
 		L.DomUtil.create('br', '', baseDiv);
 
 		// add checkbox for main area
-		var input1 = L.DomUtil.create('input');
+		var input1 = L.DomUtil.create('input', '');
 		input1.type = 'checkbox';
 		input1.id = 'idBeeControlInner_' + counter;
 		baseDiv.appendChild(input1);
 		L.DomEvent.on(input1, 'click', this._onInputClickRadius, this);
 
 		// add radius for main area
-		var select1 = L.DomUtil.create('select');
+		var select1 = L.DomUtil.create('select', '');
 		select1.id = 'idBeeControlRI_' + counter;
 		for (var i=0; i<this._r1_list.length; i++) {
 			var val = this._r1_list[i];
@@ -101,14 +101,14 @@ L.Control.BeeControl = L.Control.extend({
 		L.DomUtil.create('br', '', baseDiv);
 
 		// add checkbox for wide area
-		var input2 = L.DomUtil.create('input');
+		var input2 = L.DomUtil.create('input', '');
 		input2.type = 'checkbox';
 		input2.id = 'idBeeControlOuter_' + counter;
 		baseDiv.appendChild(input2);
 		L.DomEvent.on(input2, 'click', this._onInputClickRadius, this);
 
 		// add radius for wide area
-		var select2 = L.DomUtil.create('select');
+		var select2 = L.DomUtil.create('select', '');
 		select2.id = 'idBeeControlRO_' + counter;
 		for (var i=0; i<this._r2_list.length; i++) {
 			var val = this._r2_list[i];
@@ -131,7 +131,7 @@ L.Control.BeeControl = L.Control.extend({
 	 */
 	_initElementDetailed: function(baseDiv, counter) {
 		// add checkbox for bee location
-		var input = L.DomUtil.create('input');
+		var input = L.DomUtil.create('input', '');
 		input.type = 'checkbox';
 		input.id = 'idBeeControlCenter_' + counter;
 		baseDiv.appendChild(input);
@@ -145,7 +145,7 @@ L.Control.BeeControl = L.Control.extend({
 		L.DomUtil.create('br', '', baseDiv);
 
 		// add checkbox for main area
-		var input1 = L.DomUtil.create('input');
+		var input1 = L.DomUtil.create('input', '');
 		input1.type = 'checkbox';
 		input1.id = 'idBeeControlInner_' + counter;
 		baseDiv.appendChild(input1);
@@ -165,7 +165,7 @@ L.Control.BeeControl = L.Control.extend({
 		var nameS1 = L.DomUtil.create('span', 'beecontrol-label');
 		nameS1.innerHTML = 'Radius ';
 		baseDiv.appendChild(nameS1);
-		var select1 = L.DomUtil.create('select');
+		var select1 = L.DomUtil.create('select', '');
 		select1.id = 'idBeeControlRI_' + counter;
 		for (var i=0; i<this._r1_list.length; i++) {
 			var val = this._r1_list[i];
@@ -182,7 +182,7 @@ L.Control.BeeControl = L.Control.extend({
 		L.DomUtil.create('br', '', baseDiv);
 
 		// add checkbox for wide area
-		var input2 = L.DomUtil.create('input');
+		var input2 = L.DomUtil.create('input', '');
 		input2.type = 'checkbox';
 		input2.id = 'idBeeControlOuter_' + counter;
 		baseDiv.appendChild(input2);
@@ -202,7 +202,7 @@ L.Control.BeeControl = L.Control.extend({
 		var nameS2 = L.DomUtil.create('span', 'beecontrol-label');
 		nameS2.innerHTML = 'Radius ';
 		baseDiv.appendChild(nameS2);
-		var select2 = L.DomUtil.create('select');
+		var select2 = L.DomUtil.create('select', '');
 		select2.id = 'idBeeControlRO_' + counter;
 		for (var i=0; i<this._r2_list.length; i++) {
 			var val = this._r2_list[i];
