@@ -7,15 +7,19 @@ L.Control.BeeControl = L.Control.extend({
 		, color: '#03f' // default color of areas
 		, useGeolocation: true // flag to disable geolocation
 		, instructiontext: "" // additional text for marker popup
+		, markerimage: 'beemarker.png' // default marker image
+		, markersize: [37, 65] // size of markerimage
+		, markeranchor: [18, 63] // anchor of markerimgae
+		, markerpopupanchor: [0, -63] // anchor of markerimage's popup
 	},
 
 	initialize: function(options) {
 		L.Util.setOptions(this, options);
 		this._beeIcon = L.icon({
-			iconUrl: 'beemarker.png' // TODO: make icon configurable
-			, iconSize: [37, 65]
-			, iconAnchor: [18, 63]
-			, popupAnchor: [0, -63]
+			iconUrl: this.options.markerimage
+			, iconSize: this.options.markersize
+			, iconAnchor: this.options.markeranchor
+			, popupAnchor: this.options.markerpopupanchor
 		});
 		this._r1_list = [1, 2, 2.5, 3, 3.5];
 		this._r2_list = [4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11];

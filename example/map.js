@@ -47,7 +47,7 @@ function initMap() {
 	map.attributionControl.setPrefix("");
 
 	// add BeeControl to the map
-	var beeControl = L.control.beeControl().addTo(map);
+	var beeControl = L.control.beeControl({markerimage: '../beemarker.png'}).addTo(map);
 
 	// list all layers to use in the layer control
 	var baseMaps = {
