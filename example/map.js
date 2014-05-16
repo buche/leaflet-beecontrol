@@ -5,7 +5,7 @@
  * Author: http://www.openstreetmap.org/user/Zartbitter
  */
 
-var map;
+var map; // global variable named "map" holding the instance created by L.map() is needed by beecontrol
 
 /**
  * Initialize the map.
