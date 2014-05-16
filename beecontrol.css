@@ -15,18 +15,23 @@
 	position: relative;
 }
 
-.beecontrol-line {
-	display: block;
-	position: relative;
-	vertical-align: middle;
-
-}
-
-.beecontrol-select {
-	margin-left: 20px;
+.beecontrol-checkbox {
 }
 
 .beecontrol-label {
+}
+
+.beecontrol-select {
+}
+
+.beecontrol-linkdiv {
+	text-align: center;
+}
+
+.beecontrol-line {
+	display: block;
+	position: relative;
+
 }
 
 .beecontrol-link {
