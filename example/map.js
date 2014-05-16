@@ -60,6 +60,8 @@ function initMap() {
 	var layerControl = L.control.layers(baseMaps, {}, {collapsed: false}).addTo(map);
 	// add permalink to the map
 	map.addControl(new L.Control.Permalink({layers: layerControl, useAnchor: false, position: 'bottomright'}));
+	// add a flattr button
+	map.addControl(L.flattrButton({ flattrId: '1171821' }));
 
 	// patch layerControl to add titles
 	var patch = L.DomUtil.create('div', 'beecontrol-header');
