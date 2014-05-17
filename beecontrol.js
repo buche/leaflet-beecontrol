@@ -301,6 +301,13 @@ L.Control.BeeControl = L.Control.extend({
 			}
 		}
 		this._bees['bee' + beenr] = bee;
+
+		// change popup of initial marker if additional markers are added
+		if (beenr != '1' && typeof this._bees.bee1 != 'undefined'
+				&& typeof this._bees.bee1.marker != 'undefined'
+				&& this._bees.bee1.marker) {
+			this._bees.bee1.marker.bindPopup('Standort 1');
+		}
 	},
 
 	/**
