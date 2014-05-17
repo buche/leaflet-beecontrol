@@ -288,6 +288,7 @@ L.Control.BeeControl = L.Control.extend({
 			if (typeof bee.marker == 'undefined' || !bee.marker) {
 				bee.marker = L.marker(bee.center, {draggable: true, icon: this._beeIcon});
 				bee.marker._beenr = beenr;
+				bee.marker.bindPopup('Standort ' + beenr);
 				bee.marker.on('dragend', this._onMarkerDragend, this);
 			}
 			bee.marker.addTo(this._map);
