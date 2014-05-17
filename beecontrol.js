@@ -240,9 +240,11 @@ L.Control.BeeControl = L.Control.extend({
 			// hide link for adding beehive positions if limit is reached
 			document.getElementById('beecontroladdline').style.display = 'none';
 		}
+		// initialize new bee data structure
+		this._bees['bee' + this._countBees] = this._initBeeData();
 		// get the container
 		var container = document.getElementById('idBeeElementContainer');
-		// add a bee element
+		// add a bee element to the GUI
 		this._initElement(container, this._countBees++, true);
 		L.DomUtil.create('hr', 'beecontrol-hr', container);
 	},
