@@ -571,6 +571,7 @@ L.Control.BeeControl = L.Control.extend({
 	 * Set an initial marker after calling geolocation. Don't ask for geolocation again.
 	 */
 	setMarkerAfterGeolocation: function() {
+		this._initMarkerCalled = false; // force re-initializing of the existing marker
 		this.initMarker(false);
 	},
 
