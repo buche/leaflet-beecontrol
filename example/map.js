@@ -59,7 +59,7 @@ function initMap() {
 	// add LayerControl to the map
 	var layerControl = L.control.layers(baseMaps, {}, {collapsed: false}).addTo(map);
 	// add permalink to the map
-	map.addControl(new L.Control.Permalink({layers: layerControl, useAnchor: false, position: 'bottomright'}));
+	map.addControl(new L.Control.Permalink({layers: layerControl, useAnchor: false, position: 'bottomright', beeControl: beeControl}));
 	// add a flattr button
 	map.addControl(L.flattrButton({ flattrId: '1171821' }));
 

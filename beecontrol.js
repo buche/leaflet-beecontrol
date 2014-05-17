@@ -28,6 +28,7 @@ L.Control.BeeControl = L.Control.extend({
 
 	onAdd: function(map) {
 		this._countBees = 1;
+		this._initMarkerCalled = false;
 		this._initLayout();
 		this._map.on('updatebeecontrol', this._update_beecontrol, this);
 		this._map.on('locationfound', this._geolocationFound, this);
@@ -373,8 +374,69 @@ L.Control.BeeControl = L.Control.extend({
 		this._map.fire('beecontrolchanged');
 	},
 
-	_update_beecontrol: function(e) {
-		// TODO: change to dynamic beehive locations
+	_getBeeFromOldUrlParams: function(params) {
+		// Example of old params: r1=1, r2=4, mlat=51.58, mlon=10.1, m=1, c1=1, c2=1
+		var bee = this._initBeeData();
+		var hasParams = false;
+
+		// marker position
+		if (params.mlat && params.mlon) {
+			bee.center = L.latLng(params.mlat, params.mlon);
+			hasParams = true;
+		}
+
+		// marker visibility
+		if (params.m && params.m == '1' && params.mlat && params.mlon) {
+			bee.centerChecked = true;
+			hasParams = true;
+		}
+
+		// main area
+		if (params.r1) {
+			// only radius values of our list are valid
+			for (var i=0; i<this._r1_list.length; i++) {
+				if (this._r1_list[i] == params.r1) {
+					bee.innerRadius = params.r1;
+					hasParams = true;
+					break;
+				}
+			}
+		}
+		if (!bee.innerRadius) {
+			// no valid radius? use default
+			bee.innerRadius = this.options.r1;
+		}
+		if (params.c1 && params.c1 == '1' && params.mlat && params.mlon) {
+			bee.innerChecked = true;
+			hasParams = true;
+			document.getElementById('idBeeControlOuter_1').checked = true;
+		}
+		document.getElementById('idBeeControlRI_1').value = bee.innerRadius;
+
+		// wide area
+		if (params.r2) {
+			// only radius values of our list are valid
+			for (var i=0; i<this._r1_list.length; i++) {
+				if (this._r2_list[i] == params.r2) {
+					bee.outerRadius = params.r2;
+					hasParams = true;
+					break;
+				}
+			}
+		}
+		if (!bee.outerRadius) {
+			// no valid radius? use default
+			bee.outerRadius = this.options.r2;
+		}
+		if (params.c2 && params.c2 == '1' && params.mlat && params.mlon) {
+			bee.outerChecked = true;
+			hasParams = true;
+			document.getElementById('idBeeControlInner_1').checked = true;
+		}
+		document.getElementById('idBeeControlRO_1').value = bee.outerRadius;
+
+		return hasParams ? bee : null;
+
 		/*
 		if (e.params.r1) {
 			for (var i=0; i<this._r1_list.length; i++) {
@@ -433,13 +495,53 @@ L.Control.BeeControl = L.Control.extend({
 		*/
 	},
 
+	_getBeesFromUrlParams: function(params) {
+		// TODO
+	},
+
+	/**
+	 * Update beecontrol to use the provided url parameters.
+	 * First check if old style parameters are used.
+	 * If no oldstyle parameters are found check for new style parameters.
+	 * @param object evnt event
+	 */
+	_update_beecontrol: function(evnt) {
+		if (typeof L.UrlUtil == 'undefined') {
+			// permalink is only available when permalink plugin is used
+			return
+		}
+
+		// first check if we got some old URL parameters
+		var bee = this._getBeeFromOldUrlParams(evnt.params);
+		if (bee) {
+			// some old bee data still there?
+			if (typeof this._bees.bee1 != 'undefined' && this._bees.bee1.marker && this._map.hasLayer(this_bees.bee1.marker)) {
+				this._map.removeLayer(this._bees.bee1.marker);
+				this._bee.bee1.marker = null;
+			}
+			this._bees.bee1 = bee;
+			this.initMarker(false, false);
+			return; // finish now, do not mix oldstyle and newstyle parameters
+		}
+
+		// TODO: check if we got some new style URL parameters
+		// TODO: use _getBeesFromUrlParams()
+	},
+
 	/**
 	 * Set an initial marker. It is always bee1.
 	 * @param boolean askGeolocation ask for geolocation if true
+	 * @param boolean openPopup do not open a popup if false, defaults to true
 	 */
-	initMarker: function(askGeolocation) {
+	initMarker: function(askGeolocation, openPopup) {
+		if (this._initMarkerCalled) {
+			// do not accidentally init the marker again when it is already called by permalink
+			return;
+		}
+		this._initMarkerCalled = true;
 		var ask = typeof askGeolocation == 'undefined' ? true : !!askGeolocation;
 		ask = this.options.useGeolocation && ask && typeof navigator.geolocation != "undefined";
+		var open = typeof openPopup == 'undefined' ? true : !!openPopup;
 
 		var bee = (typeof this._bees.bee1 == 'undefined') ? this._initBeeData() : this._bees.bee1;
 		this._bees.bee1 = bee;
@@ -459,7 +561,10 @@ L.Control.BeeControl = L.Control.extend({
 						+ 'finden, wo du gerade bist</a>)<br /><br />'
 					: '')
 				+ this.options.instructiontext;
-		this._bees.bee1.marker.bindPopup(markerText).openPopup();
+		this._bees.bee1.marker.bindPopup(markerText);
+		if (open) {
+			this._bees.bee1.marker.openPopup();
+		}
 	},
 
 	/**
