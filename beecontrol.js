@@ -11,6 +11,7 @@ L.Control.BeeControl = L.Control.extend({
 		, markersize: [37, 65] // size of markerimage
 		, markeranchor: [18, 63] // anchor of markerimgae
 		, markerpopupanchor: [0, -63] // anchor of markerimage's popup
+		, maxBees: 5 // set maximum number of beehive positions, 0 for no limit
 	},
 
 	initialize: function(options) {
@@ -235,6 +236,10 @@ L.Control.BeeControl = L.Control.extend({
 	},
 
 	_addBeeElement: function() {
+		if (this.options.maxBees && this._countBees >= this.options.maxBees) {
+			// hide link for adding beehive positions if limit is reached
+			document.getElementById('beecontroladdline').style.display = 'none';
+		}
 		// get the container
 		var container = document.getElementById('idBeeElementContainer');
 		// add a bee element
@@ -256,6 +261,7 @@ L.Control.BeeControl = L.Control.extend({
 		L.DomUtil.create('hr', 'beecontrol-hr', beeElements);
 		var linkDiv = L.DomUtil.create('div', 'beecontrol-linkdiv', this._container);
 		var addLine = L.DomUtil.create('label', 'beecontrol-line', linkDiv);
+		addLine.id = 'beecontroladdline'
 		var addLink = L.DomUtil.create('a', 'beecontrol-link');
 		addLink.innerHTML = 'Zusätzlicher Standort';
 		// global variable map is needed to fire an event
