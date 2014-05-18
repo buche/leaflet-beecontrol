@@ -378,6 +378,11 @@ L.Control.BeeControl = L.Control.extend({
 
 	_onInputClickRadius: function(e) {
 		var beenr = e.target.id.split('_')[1];
+		if (e.target.id.substr(0, 17) == 'idBeeControlOuter') {
+			this._bees['bee' + beenr].outerChecked = e.target.checked;
+		} else if (e.target.id.substr(0, 17) == 'idBeeControlInner') {
+			this._bees['bee' + beenr].innerChecked = e.target.checked;
+		}
 		this._drawRadius(beenr);
 		this._map.fire('beecontrolchanged');
 	},
