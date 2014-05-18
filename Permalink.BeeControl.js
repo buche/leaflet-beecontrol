@@ -17,36 +17,33 @@ L.Control.Permalink.include({
 	},
 
 	_update_beecontrol: function() {
-		var bcopt = this.options.beeControl.options;
-		var params = { r1: bcopt.r1, r2: bcopt.r2 };
-
-		if (bcopt.mlat && bcopt.mlon && (bcopt.m || bcopt.c1 || bcopt.c2)) {
-			var position = this._round_point(L.latLng([bcopt.mlat, bcopt.mlon]))
-			params.mlat = position.lat;
-			params.mlon = position.lng;
-			if (bcopt.m) {
-				params.m = 1;
-			} else {
-				params.m = null;
+		var bees = this.options.beeControl._bees;
+		var cnt = 0;
+		var params = {};
+		for (var beeidx in bees) {
+			if (bees.hasOwnProperty(beeidx) && beeidx.match(/^bee\d+$/)) {
+				delete this._params[beeidx.replace(/ee/, '')];
+				if (bees[beeidx].centerChecked || bees[beeidx].innerChecked || bees[beeidx].outerChecked) {
+					// add bee data to permalink
+					var bee = bees[beeidx];
+					var pstr = bee.centerChecked ? '1,' : '0,';
+					if (bee.center) {
+						var c = this._round_point(bee.center);
+						pstr += c.lat + ',' + c.lng + ',';
+					} else {
+						pstr += ',,';
+					}
+					pstr += bee.innerChecked ? '1,' : '0,';
+					pstr += bee.innerRadius + ',';
+					pstr += bee.outerChecked ? '1,' : '0,';
+					pstr += bee.outerRadius + ',';
+					pstr += bee.innerColor.replace(/#/, '') + ',';
+					pstr += bee.outerColor.replace(/#/, '');
+					cnt++;
+					params['b' + cnt] = pstr;
+				}
 			}
-			if (bcopt.c1) {
-				params.c1 = 1;
-			} else {
-				params.c1 = null;
-			}
-			if (bcopt.c2) {
-				params.c2 = 1;
-			} else {
-				params.c2 = null;
-			}
-		} else {
-			params.mlat = null;
-			params.mlon = null;
-			params.m = null;
-			params.c1 = null;
-			params.c2 = null;
 		}
-
 		this._update(params);
 	},
 
