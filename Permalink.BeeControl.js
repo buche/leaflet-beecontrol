@@ -17,6 +17,18 @@ L.Control.Permalink.include({
 	},
 
 	_update_beecontrol: function() {
+		// remove old style parameters
+		if (this._params.mlat) {
+			delete this._params.m;
+			delete this._params.r1;
+			delete this._params.r2;
+			delete this._params.c1;
+			delete this._params.c2;
+			delete this._params.mlat;
+			delete this._params.mlon;
+		}
+
+		// add new style parameters
 		var bind = '|';
 		var bees = this.options.beeControl._bees;
 		var cnt = 0;
