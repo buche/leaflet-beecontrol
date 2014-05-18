@@ -450,65 +450,7 @@ L.Control.BeeControl = L.Control.extend({
 			document.getElementById('idBeeControlInner_1').checked = true;
 		}
 		document.getElementById('idBeeControlRO_1').value = bee.outerRadius;
-
 		return hasParams ? bee : null;
-
-		/*
-		if (e.params.r1) {
-			for (var i=0; i<this._r1_list.length; i++) {
-				if (this._r1_list[i] == e.params.r1) {
-					this.options.r1 = e.params.r1;
-					var elem1 = document.getElementById('idBeeControlRI_1');
-					elem1.value = this.options.r1;
-					elem1.selectedIndex = i;
-
-					// This ugly code is needed for Internet Explorer to trigger <select> to change its display
-					_s1idx = i; // global with intent
-					window.setTimeout(function() {
-						document.getElementById('idBeeControlRI_1').selectedIndex = _s1idx;
-					}, 200)
-				}
-			}
-		}
-		if (e.params.r2) {
-			for (var i=0; i<this._r2_list.length; i++) {
-				if (this._r2_list[i] == e.params.r2) {
-					this.options.r2 = e.params.r2;
-					var elem2 = document.getElementById('idBeeControlRO_1');
-					elem2.value = this.options.r2;
-					elem2.selectedIndex = i;
-
-					// This ugly code is needed for Internet Explorer to trigger <select> to change its display
-					_s2idx = i; // global with intent
-					window.setTimeout(function() {
-						document.getElementById('idBeeControlRO_1').selectedIndex = _s2idx;
-					}, 210)
-				}
-			}
-		}
-		if (e.params.mlat) {
-			this.options.mlat = e.params.mlat;
-		}
-		if (e.params.mlon) {
-			this.options.mlon = parseFloat(e.params.mlon);
-		}
-
-		if (e.params.c1 && this.options.mlat && this.options.mlon) {
-			this.options.c1 = 1;
-			document.getElementById('idBeeControlInner_1').checked = true;
-			this._drawRadius('1');
-		}
-		if (e.params.c2 && this.options.mlat && this.options.mlon) {
-			this.options.c2 = 1;
-			document.getElementById('idBeeControlOuter_1').checked = true;
-			this._drawRadius('1');
-		}
-		if (e.params.m && this.options.mlat && this.options.mlon) {
-			this.options.m = 1;
-			document.getElementById('idBeeControlCenter_1').checked = true;
-			this._markPosition('1');
-		}
-		*/
 	},
 
 	_getBeesFromUrlParams: function(params) {
