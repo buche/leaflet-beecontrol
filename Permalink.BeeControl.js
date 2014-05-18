@@ -17,6 +17,7 @@ L.Control.Permalink.include({
 	},
 
 	_update_beecontrol: function() {
+		var bind = '|';
 		var bees = this.options.beeControl._bees;
 		var cnt = 0;
 		var params = {};
@@ -26,18 +27,18 @@ L.Control.Permalink.include({
 				if (bees[beeidx].centerChecked || bees[beeidx].innerChecked || bees[beeidx].outerChecked) {
 					// add bee data to permalink
 					var bee = bees[beeidx];
-					var pstr = bee.centerChecked ? '1,' : '0,';
+					var pstr = bee.centerChecked ? '1' + bind : '0' + bind;
 					if (bee.center) {
 						var c = this._round_point(bee.center);
-						pstr += c.lat + ',' + c.lng + ',';
+						pstr += c.lat + bind + c.lng + bind;
 					} else {
-						pstr += ',,';
+						pstr += bind + bind;
 					}
-					pstr += bee.innerChecked ? '1,' : '0,';
-					pstr += bee.innerRadius + ',';
-					pstr += bee.outerChecked ? '1,' : '0,';
-					pstr += bee.outerRadius + ',';
-					pstr += bee.innerColor.replace(/#/, '') + ',';
+					pstr += bee.innerChecked ? '1' + bind : '0' + bind;
+					pstr += bee.innerRadius + bind;
+					pstr += bee.outerChecked ? '1' + bind : '0' + bind;
+					pstr += bee.outerRadius + bind;
+					pstr += bee.innerColor.replace(/#/, '') + bind;
 					pstr += bee.outerColor.replace(/#/, '');
 					cnt++;
 					params['b' + cnt] = pstr;
