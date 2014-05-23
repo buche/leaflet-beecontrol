@@ -29,7 +29,7 @@ L.Control.Permalink.include({
 		}
 
 		// add new style parameters
-		var bind = '|';
+		var bind = this.options.beeControl._permalinkseparator || "'";
 		var bees = this.options.beeControl._bees;
 		var cnt = 0;
 		var params = {};

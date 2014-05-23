@@ -25,6 +25,7 @@ L.Control.BeeControl = L.Control.extend({
 		this._r1_list = [1, 2, 2.5, 3, 3.5];
 		this._r2_list = [4, 4.5, 5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11];
 		this._bees = {}; // holds all bee location data objects
+		this._permalinkseparator = "'";
 	},
 
 	onAdd: function(map) {
