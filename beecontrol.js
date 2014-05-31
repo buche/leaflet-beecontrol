@@ -267,8 +267,8 @@ L.Control.BeeControl = L.Control.extend({
 		addLine.id = 'beecontroladdline'
 		var addLink = L.DomUtil.create('a', 'beecontrol-link');
 		addLink.innerHTML = 'Zusätzlicher Standort';
-		// global variable map is needed to fire an event
-		addLink.onclick = function() { map.fire('beecontroladdelement'); return false; }
+		var _this = this; // need a copy of this for onclick event
+		addLink.onclick = function() { _this._map.fire('beecontroladdelement'); return false; }
 		addLink.setAttribute('href', 'index.html');
 		addLine.appendChild(addLink);
 
