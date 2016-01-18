@@ -32,6 +32,9 @@ function initMap() {
 		maxZoom: 18,
 		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors</a>'
 		});
+	var esriWorldImagery = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+		attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community' 
+		});
 
 	// set initial map center and zoom
 	var zoom = 7;
@@ -54,6 +57,7 @@ function initMap() {
 		"Mapquest Open": mapquest
 		, "OpenStreetMap.de": mapnikde
 		, "OpenStreetMap": standard
+	//	, "Esri WorldImagery": esriWorldImagery
 	};
 
 	// add LayerControl to the map
