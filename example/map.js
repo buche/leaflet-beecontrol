@@ -13,16 +13,6 @@ var map; // global variable named "map" holding the instance created by L.map() 
 function initMap() {
 
 	// initialize some map layers
-	var mapquestUrl = "http://{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png",
-		mapquestSubDomains = ["otile1","otile2","otile3","otile4"],
-		mapquestAttrib = 'Data, imagery and map information provided by '
-			+ '<a href="http://open.mapquest.co.uk" target="_blank">MapQuest</a>, '
-			+ '<a href="http://www.openstreetmap.org/" target="_blank">OpenStreetMap</a> and '
-			+ '<a href="http://wiki.openstreetmap.org/wiki/Contributors" target="_blank">contributors</a>. '
-			+ 'Data: <a href="http://wiki.openstreetmap.org/wiki/Open_Database_License" target="_blank">ODbL</a>, '
-			+ 'Map: <a href="http://creativecommons.org/licenses/by-sa/2.0/" target="_blank">CC-BY-SA</a>',
-		mapquest = new L.TileLayer(mapquestUrl, {maxZoom: 18, attribution: mapquestAttrib, subdomains: mapquestSubDomains});
-
 	var standard = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 		maxZoom: 19,
 		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors</a>'
@@ -32,6 +22,7 @@ function initMap() {
 		maxZoom: 18,
 		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors</a>'
 		});
+
 	var esriWorldImagery = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
 		attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community' 
 		});
@@ -45,7 +36,7 @@ function initMap() {
 	map = L.map('map', {
 		center: new L.LatLng(lat, lon),
 		zoom: zoom,
-		layers: [mapquest]
+		layers: [mapnikde]
 	});
 	map.attributionControl.setPrefix("");
 
@@ -54,8 +45,7 @@ function initMap() {
 
 	// list all layers to use in the layer control
 	var baseMaps = {
-		"Mapquest Open": mapquest
-		, "OpenStreetMap.de": mapnikde
+		"OpenStreetMap.de": mapnikde
 		, "OpenStreetMap": standard
 	//	, "Esri WorldImagery": esriWorldImagery
 	};
